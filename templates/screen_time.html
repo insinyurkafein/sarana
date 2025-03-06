@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="theme-color" content="#0E121B" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deteksi Objek YOLO</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+  <link rel="icon" href="{{url_for('static', filename='icon_144x144.png')}}" type="image/png">
+  <link rel="icon" href="{{url_for('static', filename='icon_192x192.png')}}" type="image/png">
+  <link rel="icon" href="{{url_for('static', filename='icon_512x512.png')}}" type="image/png">
+  <link rel="apple-touch-icon" href="{{url_for('static', filename='icon_144x144.png')}}" type="image/png">
+  <link rel="apple-touch-icon" href="{{url_for('static', filename='icon_192x192.png')}}" type="image/png">
+  <link rel="apple-touch-icon" href="{{url_for('static', filename='icon_512x512.png')}}" type="image/png">
+  <link rel="manifest" href="/manifest.json">
+  <style>
+    body {
+      background-color: #0E121B;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Nunito', sans-serif;
+    }
+
+    .form-container {
+      text-align: center;
+    }
+
+    @keyframes borderColorChange {
+      0% {
+        border-bottom: 2px solid rgba(255, 255, 255, 0.5);
+      }
+
+      50% {
+        border-bottom: 2px solid rgba(51, 92, 255, 1);
+      }
+
+      100% {
+        border-bottom: 2px solid rgba(255, 255, 255, 0.5);
+      }
+    }
+
+    .input-field {
+      background: none;
+      border: none;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.5);
+      color: white;
+      font-size: 56px;
+      outline: none;
+      width: 340px;
+      text-align: center;
+      padding: 10px;
+      font-family: 'Nunito', sans-serif;
+      animation: borderColorChange 2s infinite;
+    }
+
+    .input-field::placeholder {
+      color: white;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .input-field:focus::placeholder {
+      opacity: 0;
+    }
+
+    .input-field:focus {
+      border-bottom: 2px solid #335CFF;
+      opacity: 1;
+      animation: none;
+    }
+
+    .hint {
+      color: white;
+      font-size: 16px;
+      margin-top: 16px;
+      opacity: 0.5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="form-container">
+    <form method="POST" action="/">
+      <input id="input-field" class="input-field" autocomplete="off" maxlength="3" type="text" name="screen_time"
+        placeholder="Screen Time" onkeydown="handleEnter(event)" oninput="validateInput(event)">
+      <div class="hint" id="hint">
+        Masukkan waktu dalam satuan menit
+      </div>
+    </form>
+  </div>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register("/sw.js").then(function (registration) {
+          console.log('ServiceWorker registration successful with scope: ', registration.scope);
+        }, function (err) {
+          console.log('ServiceWorker registration failed: ', err);
+        });
+      });
+    }
+
+    function handleEnter(event) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        document.querySelector('form').submit();  // Submit form when Enter is pressed
+      }
+    }
+
+    function validateInput(event) {
+      const inputField = event.target;
+      const hintElement = document.getElementById("hint");
+      const value = inputField.value;
+
+      inputField.value = value.replace(/[^0-9]/g, '');
+
+      if (inputField.value !== "") {
+        hintElement.textContent = "Tekan enter untuk memulai";
+      } else {
+        hintElement.textContent = "Masukkan waktu dalam satuan menit";
+      }
+    }
+  </script>
+
+</body>
+
+</html>
