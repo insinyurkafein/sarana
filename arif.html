@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="theme-color" content="#0E121B" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deteksi Objek YOLO</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+  <link rel="icon" href="{{url_for('static', filename='icon_144x144.png')}}" type="image/png">
+  <link rel="icon" href="{{url_for('static', filename='icon_192x192.png')}}" type="image/png">
+  <link rel="icon" href="{{url_for('static', filename='icon_512x512.png')}}" type="image/png">
+  <link rel="apple-touch-icon" href="{{url_for('static', filename='icon_144x144.png')}}" type="image/png">
+  <link rel="apple-touch-icon" href="{{url_for('static', filename='icon_192x192.png')}}" type="image/png">
+  <link rel="apple-touch-icon" href="{{url_for('static', filename='icon_512x512.png')}}" type="image/png">
+  <link rel="manifest" href="/manifest.json">
+  <style>
+    body {
+      background-color: #0E121B;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Nunito', sans-serif;
+    }
+
+    #video-container {
+      margin: auto;
+      width: 50%;
+      text-align: center;
+    }
+
+    img {
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      border-radius: 16px;
+    }
+
+    #countdown {
+      color: white;
+      font-size: 48px;
+      margin-top: 16px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="video-container">
+    <h1 id="countdown">00:00</h1>
+    <img src="{{ url_for('video_feed') }}" id="cam" alt="Live Video">
+  </div>
+
+  <audio id="screenTimeAudio" src="{{ url_for('static', filename='screen_time.mp3') }}" preload="auto"></audio>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register("/sw.js").then(function (registration) {
+          console.log('ServiceWorker registration successful with scope: ', registration.scope);
+        }, function (err) {
+          console.log('ServiceWorker registration failed: ', err);
+        });
+      });
+    }
+    let screenTimeInMinutes = {{ screen_time }};
+    let remainingTimeInSeconds = screenTimeInMinutes * 60;
+    let hasAlerted = false;
+
+    function formatTime(seconds) {
+      let hours = Math.floor(seconds / 3600);
+      let minutes = Math.floor((seconds % 3600) / 60);
+      let secs = seconds % 60;
+
+      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function updateCountdown() {
+      if (remainingTimeInSeconds > 0) {
+        document.getElementById('countdown').textContent = formatTime(remainingTimeInSeconds);
+        remainingTimeInSeconds--;
+        setTimeout(updateCountdown, 1000);
+      } else {
+        document.getElementById('countdown').textContent = 'Waktu Habis!';
+        document.getElementById('cam').style.display = 'none';
+
+        if (!hasAlerted) {
+          hasAlerted = true;
+          playScreenTimeAudio();
+          triggerVibration();
+          window.close();
+        }
+      }
+    }
+
+    function playScreenTimeAudio() {
+      let audio = document.getElementById('screenTimeAudio');
+      audio.play();
+    }
+
+    function triggerVibration() {
+      if (navigator.vibrate) {
+        navigator.vibrate([200, 100, 200]);
+      }
+    }
+
+    updateCountdown();
+  </script>
+
+</body>
+
+</html>
